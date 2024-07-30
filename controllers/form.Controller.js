@@ -3,7 +3,7 @@ const postgre = require('../database');
 const formController = {
     getAll: async (req, res) => {
         try {
-            const { rows } = await postgre.query("SELECT * FROM form_data");
+            const { rows } = await postgre.query("SELECT * FROM users");
             res.json({ msg: "OK", data: rows });
         } catch (error) {
             res.status(500).json({ msg: error.message });
@@ -12,7 +12,7 @@ const formController = {
 
     getById: async (req, res) => {
         try {
-            const { rows } = await postgre.query("SELECT * FROM form_data WHERE id = $1", [req.params.id]);
+            const { rows } = await postgre.query("SELECT * FROM users WHERE id = $1", [req.params.id]);
 
             if (rows[0]) {
                 return res.json({ msg: "OK", data: rows[0] });
@@ -29,7 +29,7 @@ const formController = {
             const { name, gender, placeOfBirth, city, idCardNumber, headline, phone, address, invoice } = req.body;
 
             const sql = `
-                INSERT INTO form_data (name, gender, placeOfBirth, city, idCardNumber, headline, phone, address, invoice)
+                INSERT INTO users (name, gender, place_of_birth, city, id_card_number, headline, phone, address, invoice)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *
             `;
 
@@ -46,8 +46,8 @@ const formController = {
             const { name, gender, placeOfBirth, city, idCardNumber, headline, phone, address, invoice } = req.body;
 
             const sql = `
-                UPDATE form_data
-                SET name = $1, gender = $2, placeOfBirth = $3, city = $4, idCardNumber = $5, headline = $6, phone = $7, address = $8, invoice = $9
+                UPDATE users
+                SET name = $1, gender = $2, place_of_birth = $3, city = $4, id_card_number = $5, headline = $6, phone = $7, address = $8, invoice = $9
                 WHERE id = $10 RETURNING *
             `;
 
@@ -65,7 +65,7 @@ const formController = {
 
     deleteById: async (req, res) => {
         try {
-            const sql = 'DELETE FROM form_data WHERE id = $1 RETURNING *';
+            const sql = 'DELETE FROM users WHERE id = $1 RETURNING *';
 
             const { rows } = await postgre.query(sql, [req.params.id]);
 

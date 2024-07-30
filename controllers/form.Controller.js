@@ -1,4 +1,6 @@
 const postgre = require('../database');
+const path = require('path');
+const fs = require('fs');
 
 const formController = {
     getAll: async (req, res) => {
@@ -26,7 +28,8 @@ const formController = {
 
     create: async (req, res) => {
         try {
-            const { name, gender, place_of_birth, city, id_card_number, headline, phone, address, invoice } = req.body;
+            const { name, gender, place_of_birth, city, id_card_number, headline, phone, address } = req.body;
+            const invoice = req.file ? req.file.filename : null;
 
             const sql = `
                 INSERT INTO users (name, gender, place_of_birth, city, id_card_number, headline, phone, address, invoice)
@@ -43,7 +46,8 @@ const formController = {
 
     updateById: async (req, res) => {
         try {
-            const { name, gender, place_of_birth, city, id_card_number, headline, phone, address, invoice } = req.body;
+            const { name, gender, place_of_birth, city, id_card_number, headline, phone, address } = req.body;
+            const invoice = req.file ? req.file.filename : null;
 
             const sql = `
                 UPDATE users
@@ -65,12 +69,22 @@ const formController = {
 
     deleteById: async (req, res) => {
         try {
-            const sql = 'DELETE FROM users WHERE id = $1 RETURNING *';
-
-            const { rows } = await postgre.query(sql, [req.params.id]);
+            // Fetch file path from database
+            const { rows } = await postgre.query('SELECT invoice FROM users WHERE id = $1', [req.params.id]);
 
             if (rows[0]) {
-                return res.json({ msg: "OK", data: rows[0] });
+                const filePath = path.join(__dirname, '../uploads', rows[0].invoice);
+                fs.unlink(filePath, (err) => {
+                    if (err) console.error('Error deleting file:', err);
+                });
+
+                // Delete record from database
+                const deleteSql = 'DELETE FROM users WHERE id = $1 RETURNING *';
+                const deleteResult = await postgre.query(deleteSql, [req.params.id]);
+
+                if (deleteResult.rows[0]) {
+                    return res.json({ msg: "OK", data: deleteResult.rows[0] });
+                }
             }
 
             res.status(404).json({ msg: "Not found" });

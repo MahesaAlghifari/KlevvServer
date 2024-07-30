@@ -26,14 +26,14 @@ const formController = {
 
     create: async (req, res) => {
         try {
-            const { name, gender, placeOfBirth, city, idCardNumber, headline, phone, address, invoice } = req.body;
+            const { name, gender, place_of_birth, city, id_card_number, headline, phone, address, invoice } = req.body;
 
             const sql = `
                 INSERT INTO users (name, gender, place_of_birth, city, id_card_number, headline, phone, address, invoice)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *
             `;
 
-            const { rows } = await postgre.query(sql, [name, gender, placeOfBirth, city, idCardNumber, headline, phone, address, invoice]);
+            const { rows } = await postgre.query(sql, [name, gender, place_of_birth, city, id_card_number, headline, phone, address, invoice]);
 
             res.json({ msg: "OK", data: rows[0] });
         } catch (error) {
@@ -43,7 +43,7 @@ const formController = {
 
     updateById: async (req, res) => {
         try {
-            const { name, gender, placeOfBirth, city, idCardNumber, headline, phone, address, invoice } = req.body;
+            const { name, gender, place_of_birth, city, id_card_number, headline, phone, address, invoice } = req.body;
 
             const sql = `
                 UPDATE users
@@ -51,7 +51,7 @@ const formController = {
                 WHERE id = $10 RETURNING *
             `;
 
-            const { rows } = await postgre.query(sql, [name, gender, placeOfBirth, city, idCardNumber, headline, phone, address, invoice, req.params.id]);
+            const { rows } = await postgre.query(sql, [name, gender, place_of_birth, city, id_card_number, headline, phone, address, invoice, req.params.id]);
 
             if (rows[0]) {
                 return res.json({ msg: "OK", data: rows[0] });
